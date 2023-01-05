@@ -1,34 +1,70 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
+import {useEffect, useRef, useState} from 'react'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+import click1 from './assets/click1.wav';
+import click2 from './assets/click2.wav';
+
+const click1Audio = new Audio(click1);
+const click2Audio = new Audio(click2);
+
+
+function App (){
+
+   const [bpm, setBpm] = useState<number>(150);
+   const [playing, setPlaying] = useState<boolean>(false);
+
+   let counter: number = 0;
+
+   useEffect(() => {
+
+       let timer: number | null = null;
+
+       if(playing){
+       timer = setInterval(() => {
+
+           if ( (counter % 4) == 0) {
+               click1Audio.play();
+               console.log('click1');
+               counter++;
+           }
+           else {
+               click2Audio.play();
+               console.log('click2');
+               counter++;
+           }
+
+       }, (60/bpm)*1000);
+
+   }
+   else {
+       clearInterval(timer);
+       setPlaying(false);
+   }
+
+   return () => {clearInterval(timer)}
+
+   }, [playing, bpm]);
+
+   const stopPlayHandler = () => {
+       setPlaying(!playing);
+   }
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className="metronome">
+
+        <div className="bpm-slider">
+            <div>{bpm} bpm</div>
+            <input value={bpm} type="range" min="60" max="240" onChange={event => setBpm(parseInt(event.target.value,10))}/>
+        </div>
+
+        <button onClick={stopPlayHandler}>
+
+            {playing ? 'Stop' : 'Play'}
+
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+
     </div>
   )
-}
 
+}
 export default App
